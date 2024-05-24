@@ -1,28 +1,24 @@
 import { createRouter, createWebHistory} from 'vue-router'
-import UploadPDF from "@/components/UploadPDF.vue"
-import QuestionPage from "@/components/QuestionPage.vue"
-import Page404 from "@/components/Page404.vue"
+// import UploadPDF from "@/components/UploadPDF.vue"
+// import QuestionPage from "@/components/QuestionPage.vue"
+import MainPage from "@/components/MainPage.vue"
+import PageError from "@/components/Page404.vue"
 import LoginPage from "@/components/LoginPage.vue"
 
 const routes = [
-    {
-        path:"/",
-        name:"upload_pdf",
-        component:UploadPDF,
-    },
     {
         path:"/login",
         name:"login_page",
         component:LoginPage,
     },
     {
-        path:"/QA",
-        name:"Q_and_A",
-        component:QuestionPage,
+        path:"/main",
+        name:"main_page",
+        component:MainPage,
     },
     {
         path:"/:catchAll(.*)",
-        component:Page404,
+        component:PageError,
     }
 ];
 

@@ -36,7 +36,7 @@ import {ElMessage} from "element-plus"
 
 
 export default {
-    name: 'QuestionWrapper',
+    name: 'QuestionPage',
     setup(){
         const {proxy} = getCurrentInstance()
         if(localStorage.getItem("Qlist") == ""){
@@ -77,8 +77,8 @@ export default {
             const answerjson = {question_id:user_answer.question_id, user_answer:user_answer.answer}
             
             renderer.is_loading = true
-            const url = proxy.$urls.names().upload_answer
-            const ret = await new proxy.$request(url, answerjson).myPOST()
+            const url = proxy.$urls.names().upload_answer //得到url
+            const ret = await new proxy.$request(url, answerjson).myPOST() //请求
             renderer.is_loading = false
             if(ret.success){
                 renderer.isAnswering = false
