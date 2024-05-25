@@ -1,5 +1,6 @@
 import { createApp } from 'vue' //引用一个方法
 import ElementPlus from 'element-plus'
+import {ElLoading} from 'element-plus'
 import router from "./router/routes"
 import 'element-plus/dist/index.css'
 import App from './App.vue' //
@@ -21,5 +22,6 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
     }
 }
 app.use(ElementPlus)
+app.directive("loading", ElLoading.directive)
 app.use(router)
 app.mount('#app') // # 是指ID

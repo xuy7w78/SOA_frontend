@@ -36,7 +36,7 @@ import {ElMessage} from "element-plus"
 
 
 export default {
-    name: 'QuestionPage',
+    name: 'QuestionSubp',
     setup(){
         const {proxy} = getCurrentInstance()
         if(localStorage.getItem("Qlist") == ""){

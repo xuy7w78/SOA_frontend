@@ -2,6 +2,18 @@
   <el-container class="layout-container" style="height: 500px">
     <el-header style="text-align: right; font-size: 12px">
       <div class="toolbar">
+        <el-dropdown>
+            <el-icon style="margin-right: 8px; margin-top: 1px">
+              <setting />
+            </el-icon>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item @click="logout">登出</el-dropdown-item>
+                <el-dropdown-item>2</el-dropdown-item>
+                <el-dropdown-item>3</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
         <span>{{ account }}</span>
       </div>
     </el-header>
@@ -9,10 +21,7 @@
     <el-container>
       <el-aside width="200px">
         <el-scrollbar>
-          <el-menu
-            class="el-menu-vertical-demo"
-            @select="handleSelect"
-          >
+          <el-menu class="el-menu-vertical-demo" @select="handleSelect" >
             <el-menu-item index="1">
               <template #title>
                 <el-icon><location /></el-icon>
@@ -20,7 +29,7 @@
               </template>
             </el-menu-item>
             <el-menu-item index="2">
-              <el-icon><MenuIcon/></el-icon>
+              <el-icon><MenuIcon /></el-icon>
               <span>历史文献</span>
             </el-menu-item>
             <el-menu-item index="3">
@@ -37,9 +46,9 @@
 
       <el-container>
         <el-main>
-            <UploadPDF v-if="select==1"></UploadPDF>
-            <Page404 v-if="select==2"/>
-            <Page404 v-if="select==3"/>
+          <SubPagePDFs v-if="select == 1"></SubPagePDFs>
+          <Page404 v-if="select == 2" />
+          <Page404 v-if="select == 3" />
         </el-main>
       </el-container>
     </el-container>
@@ -48,26 +57,30 @@
 
 <script>
 import { ref, getCurrentInstance } from "vue";
-import UploadPDF from "./UploadPDF.vue"
-import Page404 from "./Page404.vue"
+import SubPagePDFs from "./SubPage_PDFs.vue";
+import Page404 from "./Page404.vue";
 export default {
   name: "MainPage",
-  components:{
-      UploadPDF,
-      Page404,
+  components: {
+    SubPagePDFs,
+    Page404,
   },
   setup() {
     const { proxy } = getCurrentInstance();
     const account = ref(proxy.$router.currentRoute.value.query.account);
-    const select = ref(1)
+    const select = ref(1);
     const handleSelect = (key, keyPath) => {
-        keyPath
-        if(key != select.value){
-            select.value = key
-        }
-        console.log(select.value);
+      keyPath;
+      if (key != select.value) {
+        select.value = key;
+      }
+      console.log(select.value);
     };
-    return { account, select, handleSelect};
+    const logout = ()=>{
+      //logout
+      proxy.$router.push({name:"login_page"})
+    }
+    return { account, select, handleSelect, logout};
   },
 };
 </script>
