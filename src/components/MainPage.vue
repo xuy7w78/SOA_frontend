@@ -46,7 +46,7 @@
 
       <el-container>
         <el-main>
-          <SubPagePDFs v-if="select == 1"></SubPagePDFs>
+          <SubPagePDFs v-if="select == 1" @toExam="toExam"></SubPagePDFs>
           <Page404 v-if="select == 2" />
           <Page404 v-if="select == 3" />
         </el-main>
@@ -69,6 +69,7 @@ export default {
     const { proxy } = getCurrentInstance();
     const account = ref(proxy.$router.currentRoute.value.query.account);
     const select = ref(1);
+    
     const handleSelect = (key, keyPath) => {
       keyPath;
       if (key != select.value) {
@@ -80,7 +81,12 @@ export default {
       //logout
       proxy.$router.push({name:"login_page"})
     }
-    return { account, select, handleSelect, logout};
+    const toExam=(val)=>{
+      console.log("parent", val)
+      select.value = 4
+    }
+
+    return { account, select, handleSelect, logout, toExam};
   },
 };
 </script>
