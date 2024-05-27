@@ -8,7 +8,7 @@
       v-loading="loading"
       :data="PDFlist"
       style="width: 100%"
-      height="300"
+      height="500px"
       @row-click="openexamlist"
     >
       <el-table-column prop="createtime" label="createTime" width="200" />
@@ -44,29 +44,35 @@
   </el-dialog>
 
   <el-dialog v-model="visible_currentPDF" :title="PDFtitle">
-    <el-table
-      v-loading="loading_exams"
-      :data="examlist"
-      style="width: 100%"
-      height="300"
-      @row-click="toExam"
+    <el-scrollbar>
+      <el-table
+        v-loading="loading_exams"
+        :data="examlist"
+        style="width: 100%"
+        height="300"
+        @row-click="toExam"
+        :row-style="colorexam"
+      >
+        <el-table-column prop="createtime" label="createTime" width="200" />
+        <el-table-column prop="state" label="state" />
+      </el-table>
+    </el-scrollbar>
+    <el-button @click="gennewExam" :disabled="loading_exams"
+      >生成新测试</el-button
     >
-      <el-table-column prop="createtime" label="createTime" width="200" />
-      <el-table-column prop="state" label="state" />
-    </el-table>
-    <el-button @click="gennewExam" :disabled="loading_exams">生成新测试</el-button>
   </el-dialog>
 
-  <el-drawer v-model="recommend_drawer" title="RECOMMENDATION" direction="rtl">
+  <el-drawer v-model="recommend_drawer" title="RECOMMENDATIONS" direction="rtl">
   </el-drawer>
 </template>
 
 <script>
-import { reactive, toRefs, ref, getCurrentInstance} from "vue";
-import { ElMessage } from 'element-plus';
+import { reactive, toRefs, ref, getCurrentInstance } from "vue";
+import { ElMessage } from "element-plus";
 
 export default {
   name: "SubPage_PDFs",
+  emits: ["toExam"],
   setup() {
     const PDFs = reactive({
       total_page: 5,
@@ -114,11 +120,45 @@ export default {
           state: "0/10",
           examid: 5,
         },
+        {
+          createtime: "2024-1-5",
+          done: false,
+          state: "0/10",
+          examid: 5,
+        },
+        {
+          createtime: "2024-1-5",
+          done: false,
+          state: "0/10",
+          examid: 5,
+        },
+        {
+          createtime: "2024-1-5",
+          done: false,
+          state: "0/10",
+          examid: 5,
+        },
+        {
+          createtime: "2024-1-5",
+          done: false,
+          state: "0/10",
+          examid: 5,
+        },
       ],
     });
 
     const click_upload = () => {
       console.log("uploading", linker.value);
+      const res = false;
+      if (res) {
+        visible_uploadPDF.value = false;
+        fetchpage();
+      } else {
+        ElMessage({
+          message: "上传失败",
+          type: "warning",
+        });
+      }
     };
     const fetchpage = async () => {
       console.log("fetching pages");
@@ -144,19 +184,57 @@ export default {
       visible_currentPDF.value = true;
       console.log(val);
     };
-    const gennewExam = ()=>{
+    const gennewExam = () => {
       loading_exams.value = true;
       setTimeout(() => {
         loading_exams.value = false;
       }, 1000);
-      ElMessage.success("成功生成")
-    }
+      fetchexams();
+      ElMessage.success("成功生成");
+    };
+    const colorexam = (val) => {
+      if(val.row.done)
+        return {
+          backgroundColor: "#EEFFBB",
+          color: "#000",
+        };
+
+    };
     const toExam = (val) => {
-      let examid = val.examid
-      console.log(examid)
-      proxy.$emit("toExam", examid)
-    }
-    
+      const questions = [
+        {
+          question_id: 10,
+          question_type: 1,
+          question_content: "CONTENT1",
+          done: true,
+          user_answer: "USER_ANSWER1",
+          score: 70,
+          passed: false,
+          created_time: 10000000,
+          answer_time: 20000000,
+          standard_answer: "STANDARD_ANSWER1",
+          review: "REVIEW1",
+        },
+        {
+          question_id: 20,
+          question_type: 2,
+          question_content: "CONTENT2",
+          done: false,
+        },
+        {
+          question_id: 30,
+          question_type: 3,
+          question_content: "CONTENT3",
+          done: false,
+        },
+      ];
+      const savejson = JSON.stringify(questions);
+      localStorage.setItem("Qlist", savejson);
+
+      let examid = val.examid;
+      console.log(examid);
+      emit("toExam", examid);
+    };
 
     const visible_uploadPDF = ref(false);
     const visible_currentPDF = ref(false);
@@ -166,6 +244,7 @@ export default {
     const loading_exams = ref(false);
     const linker = ref("");
     const { proxy } = getCurrentInstance();
+    const emit = proxy.$emit;
 
     return {
       ...toRefs(PDFs),
@@ -183,6 +262,7 @@ export default {
       openexamlist,
       gennewExam,
       toExam,
+      colorexam,
     };
   },
 };
