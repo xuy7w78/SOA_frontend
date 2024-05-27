@@ -25,3 +25,6 @@ app.use(ElementPlus)
 app.directive("loading", ElLoading.directive)
 app.use(router)
 app.mount('#app') // # 是指ID
+
+ 
+
