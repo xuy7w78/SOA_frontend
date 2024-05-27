@@ -25,6 +25,11 @@ app.use(ElementPlus)
 app.directive("loading", ElLoading.directive)
 app.use(router)
 app.mount('#app') // # 是指ID
-
+//你需要引入该组件
+import ActivityCalendar from "vue-activity-calendar";
+//同时引入css文件，确保基本样式可用
+import "vue-activity-calendar/style.css"; 
+//以下是vue3的组件装载环节，这里不详细描述了
+app.use(ActivityCalendar); 
  
 
