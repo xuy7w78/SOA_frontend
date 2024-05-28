@@ -48,9 +48,10 @@ const request = class{
                                       question_content:element.question_content})
                 });
                 resolve({success:true, questions:retquestions})
+                // resolve(res)
             })
             .catch(err =>{
-                console.log(err)
+                // console.log(err)
                 reject(err)
             })
         }).then(res => {
