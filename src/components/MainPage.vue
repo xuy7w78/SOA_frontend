@@ -50,7 +50,7 @@
         <el-main>
           <SubPagePDFs v-if="select == '1'" @toExam="toExam"></SubPagePDFs>
           <Page404 v-if="select == '2'" />
-          <Page404 v-if="select == '3'" />
+          <SubPageProfile v-if="select == '3'" />
           <SubPageExam
             v-if="select == '4'"
             @finishExam="finishExam"
@@ -65,13 +65,16 @@
 import { ref, getCurrentInstance} from "vue";
 import SubPagePDFs from "./SubPage_PDFs.vue";
 import SubPageExam from "./SubPage_Exam.vue";
+import SubPageProfile from "./SubPage_Profile.vue";
 import Page404 from "./Page404.vue";
+import {ElMessage} from "element-plus"
 export default {
   name: "MainPage",
   components: {
     SubPagePDFs,
     SubPageExam,
     Page404,
+    SubPageProfile,
   },
   setup() {
     const { proxy } = getCurrentInstance();
@@ -87,9 +90,19 @@ export default {
       }
       console.log(select.value);
     };
-    const logout = () => {
+    const logout = async() => {
       //logout
-      proxy.$router.push({ name: "login_page" });
+      const url = proxy.$urls.names().logout
+      const ret = await new proxy.$request(url).myGET()
+      if(ret.success)
+        proxy.$router.push({ name: "login_page" });
+      else {
+        console.log(ret)
+        ElMessage({
+          message: '登出失败',
+          type: 'warning',
+        })
+      }
     };
     const toExam = (val) => {
       console.log("parent", val);

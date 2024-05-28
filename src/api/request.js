@@ -39,16 +39,15 @@ const request = class{
         return new Promise((resolve, reject) => {
             instance.get((this.url), {params: this.args})
             .then(res =>{
-                console.log(res)
-                if(!res.data.success) reject({success: res.success})
-                const retquestions = []
-                res.data.questions.forEach((element) => {
-                    retquestions.push({question_id:element.question_id, 
-                                      question_type:element.question_type,
-                                      question_content:element.question_content})
-                });
-                resolve({success:true, questions:retquestions})
-                // resolve(res)
+                // console.log(res)
+                // if(!res.data.success) reject({success: res.success})
+                // const retquestions = []
+                // res.data.questions.forEach((element) => {
+                //     retquestions.push({question_id:element.question_id, 
+                //                       question_type:element.question_type,
+                //                       question_content:element.question_content})
+                // });
+                resolve(res.data)
             })
             .catch(err =>{
                 // console.log(err)
