@@ -17,7 +17,7 @@
 
 <script>
 import {ref, getCurrentInstance} from 'vue'
-
+import {ElMessage} from "element-plus"
 export default {
   name:"LoginPage",
   setup(){
@@ -29,10 +29,37 @@ export default {
       islogin.value = !islogin.value
     }
     const click_login = async()=>{
-      proxy.$router.push({name:"main_page", query:{account:account.value}})
+      const url = proxy.$urls.names().login
+      const loginjson = {username:account.value, password:password.value}
+      const ret = await new proxy.$request(url, loginjson).myPOST()
+      if(ret.success){
+          proxy.$router.push({name:"main_page", query:{account:account.value}})
+      }
+      else{
+          console.log(ret)
+          ElMessage({
+              message: '登录失败',
+              type: 'warning',
+          })
+      }
+      
     }
     const click_register = async()=>{
       change_mode()
+      const url = proxy.$urls.names().register
+      const registerjson = {username:account.value, password:password.value, email: "thu@qq.com"}
+      const ret = await new proxy.$request(url, registerjson).myPOST()
+
+      if(ret.success){
+          proxy.$router.push({name:"main_page", query:{account:account.value}})
+      }
+      else{
+          console.log(ret)
+          ElMessage({
+              message: '注册失败',
+              type: 'warning',
+          })
+      }
     }
     return {account, password, islogin, change_mode, click_login, click_register}
   }

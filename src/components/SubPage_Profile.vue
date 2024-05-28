@@ -1,45 +1,98 @@
 <template>
   <div class="user-profile">
     <div class="user-info">
-      
+         
       <div v-html="user.avatar" class="user-avatar"></div>
-      <h2>{{ user.name }}</h2>
+      <!-- <div class="user-name">
+        <p>{{user.uname}}</p>
+      </div> -->
+      <div class="user-discription">
+        <p>{{user.discription}}</p>
+      </div>
       <div class="user-tags">
         <span v-for="(tag, index) in user.tags.slice(0, 15)" :key="index">{{ tag }}</span>
         <!-- 使用slice(0, 15)确保最多只显示15个标签 -->
       </div>
     </div>
     <div class="user-skills">
-      <radar-chart :data="user.skills"></radar-chart>
+      <div ref="chart" style="width: 100%; height: 100%;" class="chart"></div>
     </div>
   </div>
 </template>
 
 <script>
-// import axios from 'axios';
-import RadarChart from './RadarChart.vue';
+import * as echarts from 'echarts';
+import {getCurrentInstance} from 'vue'
+import {ElMessage} from "element-plus"
+
+// import RadarChart from './RadarChart.vue';
 
 import multiavatar from '@multiavatar/multiavatar'
 export default {
   components: {
-    RadarChart
+    // RadarChart
   },
   data() {
     return {
       user: {
         avatar: '',
-        name: '',
+        uname: '',
+        discription: '',
         tags: [],
-        skills: []
+        skills: [
+          { axis: '细节', value: 1},
+          { axis: '理解', value: 2},
+          { axis: '应用', value: 3},
+          { axis: '总结', value: 4}
+        ]
       }
     };
   },
   async created() {
-    // const response = await axios.get('https://api.example.com/user');
-    // this.user = response.data
-    this.user = {
+    const {proxy} = getCurrentInstance()
+    const url = proxy.$urls.names().get_profile
+    const ret = await new proxy.$request(url).myGET()
+    
+
+    if(ret.success) {
+      // console.log('获取用户信息成功')
+      // console.log(ret)
+      this.user = {
+        avatar: multiavatar(ret.username),
+        uname: ret.username,
+        tags: ret.labels,
+        discription: ret.description,
+        skills: [
+          { axis: '细节', value: ret.average_score.tf},
+          { axis: '理解', value: ret.average_score.choice},
+          { axis: '应用', value: ret.average_score.blank},
+          { axis: '总结', value: ret.average_score.review}
+        ]
+      }
+      const chart = echarts.init(this.$refs.chart);
+
+      chart.setOption({
+        radar: {
+          indicator: this.user.skills.map(item => ({ name: item.axis, max: 1 }))
+        },
+        series: [{
+          type: 'radar',
+          data: [this.user.skills.map(item => item.value)],
+        }],
+      });
+      chart.resize({
+        width: 400,
+        height: 400
+      })
+    } else {
+      ElMessage({
+        message: '获取用户信息失败',
+        type: 'warning',
+      })
+      this.user = {
       avatar: multiavatar('John Doe'),
-      name: 'John Doe',
+      uname: 'John Doe',
+      discription: 'This is a user profile',
       tags: ['Designer', 'Developer', 'Photographer', 'Designer', 'Developer', 'Photographer', 'Designer', 'Developer', 'Photographer'],
       skills: [
         { axis: 'JavaScript', value: 0.8 },
@@ -49,6 +102,8 @@ export default {
         { axis: 'Vue.js', value: 0.8 },
       ]
     }
+    }
+    
   }
 };
 </script>
@@ -57,6 +112,7 @@ export default {
 .user-profile {
   display: flex;
   justify-content: space-between;
+  margin-top: 30px;
 }
 .user-info {
   width: 50%;
@@ -76,12 +132,24 @@ export default {
   opacity: 0.6;
 }
 .user-skills {
-  width: 50%;
+  width: 45%;
 }
 
 .user-avatar {
   width:50%;
   margin-left: 25%;
   background-position: center;
+}
+
+.chart {
+  width: 100%;
+  height: 100%;
+}
+</style>
+
+<style scoped>
+.canvas {
+  width: 100%;
+  height: 100%;
 }
 </style>
