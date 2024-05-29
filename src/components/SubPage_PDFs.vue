@@ -1,6 +1,6 @@
 <template>
   <div v-loading="tot_loading">
-    <div style="text-align: left; font-size: 12px">
+    <div style="text-align: left; font-size: 12px; padding: 10px">
       <el-button @click="visible_uploadPDF = true">添加文献</el-button>
       <el-button @click="click_recommend">推荐文献</el-button>
     </div>
@@ -77,12 +77,21 @@
   <el-drawer v-model="recommend_drawer" title="推荐文献列表" direction="rtl">
     <div v-loading="loading_recommends">
       <el-scrollbar>
-        <el-card v-for="item in recommendations" :key="item.document_id" class="rec-item">
+        <!-- <el-descriptions
+          :column="1"
+          border v-for="item in recommendations" :key="item.document_id" class="rec-item"
+        >
+          <el-descriptions-item label="标题" :labelStyle='labelStyle'>{{item.title }}</el-descriptions-item>
+          <el-descriptions-item label="日期">{{item.date}}</el-descriptions-item>
+          <el-descriptions-item label="作者">{{item.authors}}</el-descriptions-item>
+          <el-descriptions-item label="摘要">{{item.abstract}}</el-descriptions-item>
+      </el-descriptions> -->
+        <el-card v-for="item in recommendations" :key="item.document_id" class="rec-item" @click="jumpTo(item.link)">
           <div>
             <!-- 标题、日期、作者、摘要，日期和作者斜体 -->
             <h3>Title: {{ item.title }}</h3>
             <p><i>Date: {{ item.date }}</i></p>
-            <p><i>Authors: {{ item.author }}</i></p>
+            <p><i>Authors: {{ item.authors }}</i></p>
             <p>{{ item.abstract }}</p>
           </div>
         </el-card>
@@ -99,6 +108,11 @@ export default {
   name: "SubPage_PDFs",
   emits: ["toExam"],
   setup() {
+    const jumpTo = (val) => {
+      console.log(val);
+      window.open(val);
+
+    };
     const PDFs = reactive({
       total_page: 1,
       current_page: 1,
@@ -166,6 +180,20 @@ export default {
       const ret = await new proxy.$request(url).myGET(); //请求
       if (ret.success) {
         RECs.recommendations = ret.recommendations;
+        for (let i = 0; i < RECs.recommendations.length; i++) {
+          if (RECs.recommendations[i].link.indexOf("http") == -1) {
+            RECs.recommendations[i].link = "https://" + RECs.recommendations[i].link;
+          }
+          // 日期
+          let date = new Date(RECs.recommendations[i].date);
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, "0");
+          const day = String(date.getDate()).padStart(2, "0");
+          const hours = String(date.getHours()).padStart(2, "0");
+          const minutes = String(date.getMinutes()).padStart(2, "0");
+          RECs.recommendations[i].date = `${year}年${month}月${day}日 ${hours}:${minutes}`;
+
+        }
       } else {
         await Promise.reject();
       }
@@ -309,9 +337,9 @@ export default {
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, "0");
       const day = String(date.getDate()).padStart(2, "0");
-      const hours = String(date.getHours()).padStart(2, "0");
-      const minutes = String(date.getMinutes()).padStart(2, "0");
-      row.created_time_translated = `${year}年${month}月${day}日 ${hours}:${minutes}`;
+      // const hours = String(date.getHours()).padStart(2, "0");
+      // const minutes = String(date.getMinutes()).padStart(2, "0");
+      row.created_time_translated = `${year}年${month}月${day}日`;
     };
 
     const visible_uploadPDF = ref(false);
@@ -349,6 +377,7 @@ export default {
       loading_recommends,
       click_recommend,
       rowCreateTime,
+      jumpTo,
     };
   },
 };
@@ -373,3 +402,4 @@ export default {
   background-color: #e6f7ff;
 }
 </style>
+
