@@ -10,10 +10,15 @@
       style="width: 100%"
       height="500px"
       @row-click="openexamlist"
+      :row-class-name="rowCreateTime"
       empty-text=" "
     >
-      <el-table-column prop="create_time" label="createTime" width="200" />
-      <el-table-column prop="title" label="Title" />
+      <el-table-column
+        prop="created_time_translated"
+        label="创建时间"
+        width="200"
+      />
+      <el-table-column prop="title" label="论文题目" />
     </el-table>
   </div>
   <div>
@@ -53,10 +58,15 @@
         height="300"
         @row-click="toExam"
         :row-style="colorexam"
+        :row-class-name="rowCreateTime"
         empty-text=" "
       >
-        <el-table-column prop="created_time" label="createTime" width="200" />
-        <el-table-column prop="state" label="state" />
+        <el-table-column
+          prop="created_time_translated"
+          label="创建时间"
+          width="200"
+        />
+        <el-table-column prop="state" label="测试完成情况" />
       </el-table>
     </el-scrollbar>
     <el-button @click="gennewExam" :disabled="loading_exams"
@@ -94,7 +104,13 @@ export default {
     onMounted(() => {
       fetchpage(0).then(() => {
         tot_loading.value = false;
-      });
+      }).catch(()=>{
+        tot_loading.value = false;
+        ElMessage({
+          message:"请求列表失败",
+          type:"warning"
+        })
+      })
     });
 
     //Requests
@@ -146,27 +162,27 @@ export default {
       const url = proxy.$urls.names().gen_exam;
       const ret = await new proxy.$request(url, { document_id: id }).myPOST(); //请求
       if (ret.success) {
-        console.log(ret.exam_id);
         return ret.exam_id;
       } else {
-        Promise.reject();
+        await Promise.reject();
       }
     };
     const uploadpdf = async () => {
-      const url = proxy.$urls.names().upload_pdf
-      const ret = await new proxy.$request(url, { pdf_url:linker.value }).myPOST(); //请求
-      console.log(ret)
+      const url = proxy.$urls.names().upload_pdf;
+      const ret = await new proxy.$request(url, {
+        pdf_url: linker.value,
+      }).myPOST(); //请求
       if (ret.success) {
-        return {success:true};
+        return { success: true };
       } else {
-        Promise.reject();
+        await Promise.reject();
       }
     };
 
     //Interactions
     const click_upload = () => {
       // console.log("uploading", linker.value);
-      is_uploading.value = true
+      is_uploading.value = true;
       uploadpdf()
         .then(() => {
           is_uploading.value = false;
@@ -175,56 +191,17 @@ export default {
             message: "上传成功",
             type: "success",
           });
-          linker.value = ""
-          pagechanged(1)
+          linker.value = "";
+          pagechanged(1);
         })
         .catch(() => {
+          is_uploading.value = false;
           ElMessage({
             message: "上传失败",
             type: "warning",
           });
         });
     }; //REFs
-    const pagechanged = (val) => {
-      PDFs.current_page = val;
-      loading.value = true;
-      fetchpage(PDFs.current_page - 1).then(() => {
-        loading.value = false;
-      });
-    }; //TOADDFALSE
-    const openexamlist = (val) => {
-      loading_exams.value = true;
-      visible_currentPDF.value = true;
-      curPDF.PDFtitle = val.title;
-      curPDF.PDFid = val.document_id;
-      fetchexams(val.document_id).then(() => {
-        loading_exams.value = false;
-      });
-    }; //TOADDFALSE
-    const gennewExam = () => {
-      loading_exams.value = true;
-      genexam(curPDF.PDFid)
-        .then((id) => {
-          loading_exams.value = false;
-          toExam({ exam_id: id });
-        })
-        .catch(() => {});
-    }; //TOADDFALSE
-    const colorexam = (val) => {
-      if (val.row.done)
-        return {
-          backgroundColor: "#EEFFBB",
-          color: "#000",
-        };
-    };
-    const toExam = (val) => {
-      loading_exams.value = true;
-      fetchquestions(val.exam_id).then(() => {
-        let examid = val.exam_id;
-        loading_exams.value = false;
-        emit("toExam", examid);
-      });
-    }; //TOADDFALSE
     const click_recommend = () => {
       loading_recommends.value = true;
       recommend_drawer.value = true;
@@ -240,6 +217,89 @@ export default {
             type: "warning",
           });
         });
+    };
+    const pagechanged = (val) => {
+      PDFs.current_page = val;
+      loading.value = true;
+      fetchpage(PDFs.current_page - 1).then(() => {
+        loading.value = false;
+      }).catch(()=>{
+        ElMessage({
+          message:"请求列表失败",
+          type:"warning",
+        })
+        loading.value = false;
+      })
+    };
+    const openexamlist = (val) => {
+      loading_exams.value = true;
+      visible_currentPDF.value = true;
+      curPDF.PDFtitle = val.title;
+      curPDF.PDFid = val.document_id;
+      fetchexams(val.document_id).then(() => {
+        loading_exams.value = false;
+      }).catch(()=>{
+        loading_exams.value = false;
+        ElMessage({
+          message:"请求测试列表失败",
+          type:"warning"
+        })
+      })
+    };
+    const gennewExam = () => {
+      loading_exams.value = true;
+      genexam(curPDF.PDFid).then((id) => {
+          loading_exams.value = false;
+          ElMessage({
+            message: "生成成功",
+            type: "success",
+          });
+          toExam({ exam_id: id });
+        }).catch(() => {
+          loading_exams.value = false;
+          ElMessage({
+            message: "生成失败",
+            type: "warning",
+          });
+        });
+    };
+    const toExam = (val) => {
+      loading_exams.value = true;
+      fetchquestions(val.exam_id)
+        .then(() => {
+          let examid = val.exam_id;
+          loading_exams.value = false;
+          ElMessage({
+            message: "开始测试",
+            type: "success",
+          })
+          emit("toExam", examid);
+        })
+        .catch(() => {
+          loading_exams.value = false;
+          visible_currentPDF.value = false;
+          ElMessage({
+            message: "跳转测试失败",
+            type: "warning",
+          });
+        });
+    };
+
+    const colorexam = (val) => {
+      if (val.row.done)
+        return {
+          backgroundColor: "#EEFFBB",
+          color: "#000",
+        };
+    };
+    const rowCreateTime = ({ row }) => {
+      let date = new Date(row.created_time);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      const hours = String(date.getHours()).padStart(2, "0");
+      const minutes = String(date.getMinutes()).padStart(2, "0");
+      row.created_time_translated = `${year}年${month}月${day}日 ${hours}:${minutes}`;
     };
 
     const visible_uploadPDF = ref(false);
@@ -276,6 +336,7 @@ export default {
       colorexam,
       loading_recommends,
       click_recommend,
+      rowCreateTime,
     };
   },
 };
