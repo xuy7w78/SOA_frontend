@@ -1,8 +1,8 @@
 <template>
-  <div>
+  <div v-loading="tot_loading">
     <div style="text-align: left; font-size: 12px">
       <el-button @click="visible_uploadPDF = true">添加文献</el-button>
-      <el-button @click="recommend_drawer = true">推荐文献</el-button>
+      <el-button @click="click_recommend">推荐文献</el-button>
     </div>
     <el-table
       v-loading="loading"
@@ -10,8 +10,9 @@
       style="width: 100%"
       height="500px"
       @row-click="openexamlist"
+      empty-text=" "
     >
-      <el-table-column prop="createtime" label="createTime" width="200" />
+      <el-table-column prop="create_time" label="createTime" width="200" />
       <el-table-column prop="title" label="Title" />
     </el-table>
   </div>
@@ -52,8 +53,9 @@
         height="300"
         @row-click="toExam"
         :row-style="colorexam"
+        empty-text=" "
       >
-        <el-table-column prop="createtime" label="createTime" width="200" />
+        <el-table-column prop="created_time" label="createTime" width="200" />
         <el-table-column prop="state" label="state" />
       </el-table>
     </el-scrollbar>
@@ -63,11 +65,12 @@
   </el-dialog>
 
   <el-drawer v-model="recommend_drawer" title="RECOMMENDATIONS" direction="rtl">
+    <div v-loading="loading_recommends">{{ recommendations }}</div>
   </el-drawer>
 </template>
 
 <script>
-import { reactive, toRefs, ref, getCurrentInstance } from "vue";
+import { reactive, toRefs, ref, getCurrentInstance, onMounted } from "vue";
 import { ElMessage } from "element-plus";
 
 export default {
@@ -75,165 +78,149 @@ export default {
   emits: ["toExam"],
   setup() {
     const PDFs = reactive({
-      total_page: 5,
+      total_page: 1,
       current_page: 1,
-      PDFlist: [
-        { createtime: "2024-1-1", title: "name1", id: 1 },
-        { createtime: "2024-1-2", title: "name2", id: 2 },
-        { createtime: "2024-1-3", title: "name3", id: 3 },
-        { createtime: "2024-1-4", title: "name4", id: 4 },
-        { createtime: "2024-1-4", title: "name4", id: 5 },
-        { createtime: "2024-1-4", title: "name4", id: 6 },
-        { createtime: "2024-1-4", title: "name4", id: 7 },
-      ],
+      PDFlist: [],
     });
     const curPDF = reactive({
       PDFtitle: "title",
-      examlist: [
-        {
-          createtime: "2024-1-1",
-          done: true,
-          state: "10/10",
-          examid: 1,
-        },
-        {
-          createtime: "2024-1-2",
-          done: true,
-          state: "10/10",
-          examid: 2,
-        },
-        {
-          createtime: "2024-1-3",
-          done: true,
-          state: "10/10",
-          examid: 3,
-        },
-        {
-          createtime: "2024-1-4",
-          done: false,
-          state: "5/10",
-          examid: 4,
-        },
-        {
-          createtime: "2024-1-5",
-          done: false,
-          state: "0/10",
-          examid: 5,
-        },
-        {
-          createtime: "2024-1-5",
-          done: false,
-          state: "0/10",
-          examid: 5,
-        },
-        {
-          createtime: "2024-1-5",
-          done: false,
-          state: "0/10",
-          examid: 5,
-        },
-        {
-          createtime: "2024-1-5",
-          done: false,
-          state: "0/10",
-          examid: 5,
-        },
-        {
-          createtime: "2024-1-5",
-          done: false,
-          state: "0/10",
-          examid: 5,
-        },
-      ],
+      PDFid: 0,
+      examlist: [],
+    });
+    const RECs = reactive({
+      recommendations: [],
     });
 
+    onMounted(() => {
+      fetchpage(0).then(() => {
+        tot_loading.value = false;
+      });
+    });
+
+    //Requests
+    const fetchpage = async (idx) => {
+      const url = proxy.$urls.names().get_documents;
+      const ret = await new proxy.$request(url, { page_index: idx }).myGET(); //请求
+      if (ret.success) {
+        PDFs.PDFlist = ret.documents;
+        PDFs.total_page = ret.total_pages;
+      } else {
+        await Promise.reject();
+      }
+    };
+    const fetchexams = async (id) => {
+      curPDF.examlist = []
+      const url = proxy.$urls.names().get_exams;
+      const ret = await new proxy.$request(url, { document_id: id }).myGET(); //请求
+      if (ret.success) {
+        curPDF.examlist = ret.exams;
+        curPDF.examlist.forEach((element, index) => {
+          element["state"] =
+            String(element.done_number) + "/" + String(element.question_number);
+          return (curPDF.examlist[index] = element);
+        });
+      } else {
+        await Promise.reject();
+      }
+    };
+    const fetchquestions = async (id) => {
+      const url = proxy.$urls.names().get_questions;
+      const ret = await new proxy.$request(url, { exam_id: id }).myGET(); //请求
+      if (ret.success) {
+        const Qlist = JSON.stringify(ret.questions);
+        localStorage.setItem("Qlist", Qlist);
+      } else {
+        await Promise.reject();
+      }
+    };
+    const fetchrecommendations = async () => {
+      const url = proxy.$urls.names().get_recommends;
+      const ret = await new proxy.$request(url).myGET(); //请求
+      if (ret.success) {
+        RECs.recommendations = ret.recommendations;
+      } else{
+        await Promise.reject()
+      }
+    };
+    const genexam = async (id) => {
+      const url = proxy.$urls.names().gen_exam;
+      const ret = await new proxy.$request(url, {document_id:id}).myPOST(); //请求
+      if (ret.success){
+        console.log(ret.exam_id)
+        return ret.exam_id
+      } else{
+        Promise.reject()
+      }
+    }
+
+    //Interactions
     const click_upload = () => {
       console.log("uploading", linker.value);
       const res = false;
       if (res) {
         visible_uploadPDF.value = false;
-        fetchpage();
+        fetchpage(1);
       } else {
         ElMessage({
           message: "上传失败",
           type: "warning",
         });
       }
-    };
-    const fetchpage = async () => {
-      console.log("fetching pages");
-    };
+    }; //REFs
     const pagechanged = (val) => {
-      loading.value = true;
-      setTimeout(() => {
-        loading.value = false;
-      }, 5000);
-      fetchpage();
       PDFs.current_page = val;
-      console.log(`: ${PDFs.current_page}`);
-    };
-    const fetchexams = async () => {
-      console.log("fetching exams");
-    };
+      loading.value = true;
+      fetchpage(PDFs.current_page - 1).then(() => {
+        loading.value = false;
+      });
+    }; //TOADDFALSE
     const openexamlist = (val) => {
-      fetchexams();
       loading_exams.value = true;
-      setTimeout(() => {
-        loading_exams.value = false;
-      }, 1000);
       visible_currentPDF.value = true;
-      console.log(val);
-    };
+      curPDF.PDFtitle = val.title;
+      curPDF.PDFid = val.document_id;
+      fetchexams(val.document_id).then(() => {
+        loading_exams.value = false;
+      });
+    }; //TOADDFALSE
     const gennewExam = () => {
       loading_exams.value = true;
-      setTimeout(() => {
+      genexam(curPDF.PDFid).then((id)=>{
         loading_exams.value = false;
-      }, 1000);
-      fetchexams();
-      ElMessage.success("成功生成");
-    };
+        toExam({exam_id:id})
+      }).catch(()=>{
+      })
+    }; //TOADDFALSE
     const colorexam = (val) => {
-      if(val.row.done)
+      if (val.row.done)
         return {
           backgroundColor: "#EEFFBB",
           color: "#000",
         };
-
     };
     const toExam = (val) => {
-      const questions = [
-        {
-          question_id: 10,
-          question_type: 1,
-          question_content: "CONTENT1",
-          done: true,
-          user_answer: "USER_ANSWER1",
-          score: 70,
-          passed: false,
-          created_time: 10000000,
-          answer_time: 20000000,
-          standard_answer: "STANDARD_ANSWER1",
-          review: "REVIEW1",
-        },
-        {
-          question_id: 20,
-          question_type: 2,
-          question_content: "CONTENT2",
-          done: false,
-        },
-        {
-          question_id: 30,
-          question_type: 3,
-          question_content: "CONTENT3",
-          done: false,
-        },
-      ];
-      const savejson = JSON.stringify(questions);
-      localStorage.setItem("Qlist", savejson);
-
-      let examid = val.examid;
-      console.log(examid);
-      emit("toExam", examid);
+      loading_exams.value = true;
+      fetchquestions(val.exam_id).then(() => {
+        let examid = val.exam_id;
+        loading_exams.value = false;
+        emit("toExam", examid);
+      });
+    }; //TOADDFALSE
+    const click_recommend = () => {
+      loading_recommends.value = true;
+      recommend_drawer.value = true;
+      fetchrecommendations()
+        .then(() => {
+          loading_recommends.value = false;
+        })
+        .catch(() => {
+          recommend_drawer.value = false;
+          loading_recommends.value = false;
+          ElMessage({
+            message: "获取推荐列表失败",
+            type: "warning",
+          });
+        });
     };
 
     const visible_uploadPDF = ref(false);
@@ -241,14 +228,18 @@ export default {
     const recommend_drawer = ref(false);
     const is_uploading = ref(false);
     const loading = ref(false);
+    const tot_loading = ref(true);
     const loading_exams = ref(false);
+    const loading_recommends = ref(false);
     const linker = ref("");
+
     const { proxy } = getCurrentInstance();
     const emit = proxy.$emit;
 
     return {
       ...toRefs(PDFs),
       ...toRefs(curPDF),
+      ...toRefs(RECs),
       visible_currentPDF,
       recommend_drawer,
       pagechanged,
@@ -258,11 +249,14 @@ export default {
       is_uploading,
       click_upload,
       fetchpage,
+      tot_loading,
       loading_exams,
       openexamlist,
       gennewExam,
       toExam,
       colorexam,
+      loading_recommends,
+      click_recommend,
     };
   },
 };

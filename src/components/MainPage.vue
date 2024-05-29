@@ -54,6 +54,7 @@
           <SubPageExam
             v-if="select == '4'"
             @finishExam="finishExam"
+            :exam_id="curexam"
           ></SubPageExam>
         </el-main>
       </el-container>
@@ -82,6 +83,7 @@ export default {
     const select = ref("1");
     const examing = ref(false);
     const examdone = ref(false);
+    const curexam = ref("");
 
     const handleSelect = (key, keyPath) => {
       keyPath;
@@ -105,7 +107,8 @@ export default {
       }
     };
     const toExam = (val) => {
-      console.log("parent", val);
+      // console.log("parent", val);
+      curexam.value = val;
       select.value = 4;
       examing.value = true;
     };
@@ -124,6 +127,7 @@ export default {
       logout,
       toExam,
       finishExam,
+      curexam,
     };
   },
 };
