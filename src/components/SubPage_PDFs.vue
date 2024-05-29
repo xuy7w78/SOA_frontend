@@ -64,8 +64,20 @@
     >
   </el-dialog>
 
-  <el-drawer v-model="recommend_drawer" title="RECOMMENDATIONS" direction="rtl">
-    <div v-loading="loading_recommends">{{ recommendations }}</div>
+  <el-drawer v-model="recommend_drawer" title="推荐文献列表" direction="rtl">
+    <div v-loading="loading_recommends">
+      <el-scrollbar>
+        <el-card v-for="item in recommendations" :key="item.document_id" class="rec-item">
+          <div>
+            <!-- 标题、日期、作者、摘要，日期和作者斜体 -->
+            <h3>Title: {{ item.title }}</h3>
+            <p><i>Date: {{ item.date }}</i></p>
+            <p><i>Authors: {{ item.author }}</i></p>
+            <p>{{ item.abstract }}</p>
+          </div>
+        </el-card>
+      </el-scrollbar>
+    </div>
   </el-drawer>
 </template>
 
@@ -282,4 +294,21 @@ export default {
 </script>
 
 <style>
+
+.rec-item {
+  padding: 10px;
+  border-bottom: 1px solid #ebeef5;
+  text-align: left;
+  margin: 20px;
+  background-color: #f5f7fa;
+  border-radius: 5px;
+  cursor: pointer;
+
+  
+
+}
+
+.rec-item:hover {
+  background-color: #e6f7ff;
+}
 </style>
