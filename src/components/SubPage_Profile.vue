@@ -73,7 +73,7 @@ export default {
 
       chart.setOption({
         radar: {
-          indicator: this.user.skills.map(item => ({ name: item.axis, max: 1 }))
+          indicator: this.user.skills.map(item => ({ name: item.axis, max: 100 }))
         },
         series: [{
           type: 'radar',
