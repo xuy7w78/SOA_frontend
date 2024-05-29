@@ -103,6 +103,8 @@ export default {
       answerquestion(Q_manager.Qlist[Q_manager.Qindx].question_id).then(()=>{
         answerstate.value = 1;
         loading_ret.value = false
+        Q_manager.Qlist[Q_manager.Qindx].done = true
+        localStorage.setItem("Qlist",JSON.stringify(Q_manager.Qlist));
       }).catch(()=>{
         loading_ret.value = false
         ElMessage({
