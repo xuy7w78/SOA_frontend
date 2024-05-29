@@ -109,7 +109,7 @@ export default {
       }
     };
     const fetchexams = async (id) => {
-      curPDF.examlist = []
+      curPDF.examlist = [];
       const url = proxy.$urls.names().get_exams;
       const ret = await new proxy.$request(url, { document_id: id }).myGET(); //请求
       if (ret.success) {
@@ -138,34 +138,52 @@ export default {
       const ret = await new proxy.$request(url).myGET(); //请求
       if (ret.success) {
         RECs.recommendations = ret.recommendations;
-      } else{
-        await Promise.reject()
+      } else {
+        await Promise.reject();
       }
     };
     const genexam = async (id) => {
       const url = proxy.$urls.names().gen_exam;
-      const ret = await new proxy.$request(url, {document_id:id}).myPOST(); //请求
-      if (ret.success){
-        console.log(ret.exam_id)
-        return ret.exam_id
-      } else{
-        Promise.reject()
+      const ret = await new proxy.$request(url, { document_id: id }).myPOST(); //请求
+      if (ret.success) {
+        console.log(ret.exam_id);
+        return ret.exam_id;
+      } else {
+        Promise.reject();
       }
-    }
+    };
+    const uploadpdf = async () => {
+      const url = proxy.$urls.names().upload_pdf
+      const ret = await new proxy.$request(url, { pdf_url:linker.value }).myPOST(); //请求
+      console.log(ret)
+      if (ret.success) {
+        return {success:true};
+      } else {
+        Promise.reject();
+      }
+    };
 
     //Interactions
     const click_upload = () => {
-      console.log("uploading", linker.value);
-      const res = false;
-      if (res) {
-        visible_uploadPDF.value = false;
-        fetchpage(1);
-      } else {
-        ElMessage({
-          message: "上传失败",
-          type: "warning",
+      // console.log("uploading", linker.value);
+      is_uploading.value = true
+      uploadpdf()
+        .then(() => {
+          is_uploading.value = false;
+          visible_uploadPDF.value = false;
+          ElMessage({
+            message: "上传成功",
+            type: "success",
+          });
+          linker.value = ""
+          pagechanged(1)
+        })
+        .catch(() => {
+          ElMessage({
+            message: "上传失败",
+            type: "warning",
+          });
         });
-      }
     }; //REFs
     const pagechanged = (val) => {
       PDFs.current_page = val;
@@ -185,11 +203,12 @@ export default {
     }; //TOADDFALSE
     const gennewExam = () => {
       loading_exams.value = true;
-      genexam(curPDF.PDFid).then((id)=>{
-        loading_exams.value = false;
-        toExam({exam_id:id})
-      }).catch(()=>{
-      })
+      genexam(curPDF.PDFid)
+        .then((id) => {
+          loading_exams.value = false;
+          toExam({ exam_id: id });
+        })
+        .catch(() => {});
     }; //TOADDFALSE
     const colorexam = (val) => {
       if (val.row.done)

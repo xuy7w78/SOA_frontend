@@ -12,6 +12,7 @@ const urls = class{
         const get_recommends   = `${url}/get_recommendations`
         const gen_exam         = `${url}/generate_exam`
         const ans_question     = `${url}/answer_question`
+        const upload_pdf       = `${url}/upload_document`
         return {
             login,
             logout,
@@ -23,6 +24,7 @@ const urls = class{
             get_recommends,
             gen_exam,
             ans_question,
+            upload_pdf,
         }
     }
 
