@@ -6,6 +6,7 @@ const urls = class{
         const logout           = `${url}/logout`
         const register         = `${url}/register`
         const get_profile      = `${url}/get_user_profile`
+
         const get_documents    = `${url}/get_documents`
         const get_exams        = `${url}/get_exams`
         const get_questions    = `${url}/get_exam`
