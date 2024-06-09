@@ -89,10 +89,12 @@
         <el-card v-for="item in recommendations" :key="item.document_id" class="rec-item" @click="jumpTo(item.link)">
           <div>
             <!-- 标题、日期、作者、摘要，日期和作者斜体 -->
+            <!-- 日期和作者的颜色为蓝色 -->
             <h3>Title: {{ item.title }}</h3>
-            <p><i>Date: {{ item.date }}</i></p>
-            <p><i>Authors: {{ item.authors }}</i></p>
-            <p>{{ item.abstract }}</p>
+            <p style="color: red;"><b>Date:</b> <i>{{ item.date }}</i></p>
+            <p style="color: red;"><b>Authors:</b> <i>{{ item.authors }}</i></p>
+            <!--摘要行距稍微大一点-->
+            <p style="line-height: 1.5em;"><b>Abstract:</b> {{ item.abstract }}</p>
           </div>
         </el-card>
       </el-scrollbar>
@@ -189,9 +191,9 @@ export default {
           const year = date.getFullYear();
           const month = String(date.getMonth() + 1).padStart(2, "0");
           const day = String(date.getDate()).padStart(2, "0");
-          const hours = String(date.getHours()).padStart(2, "0");
-          const minutes = String(date.getMinutes()).padStart(2, "0");
-          RECs.recommendations[i].date = `${year}年${month}月${day}日 ${hours}:${minutes}`;
+          RECs.recommendations[i].date = `${year}年${month}月${day}日`;
+
+          RECs.recommendations[i].authors = RECs.recommendations[i].authors.join(", ");
 
         }
       } else {
