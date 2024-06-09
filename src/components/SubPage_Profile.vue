@@ -7,7 +7,8 @@
         <p>{{user.uname}}</p>
       </div> -->
       <div class="user-discription">
-        <p>{{user.discription}}</p>
+        <!--字体左对齐且行距为1.5倍-->
+        <p style="text-align: left; line-height: 1.5">{{user.discription}}</p>
       </div>
       <div class="user-tags">
         <span v-for="(tag, index) in user.tags.slice(0, 15)" :key="index">{{ tag }}</span>
@@ -113,6 +114,7 @@ export default {
   display: flex;
   justify-content: space-between;
   margin-top: 30px;
+  margin-left: 20px;
 }
 .user-info {
   width: 50%;

@@ -30,10 +30,10 @@
               <el-icon><location /></el-icon>
               <span>文献记录</span>
             </el-menu-item>
-            <el-menu-item index="2">
+            <!-- <el-menu-item index="2">
               <el-icon><MenuIcon /></el-icon>
               <span>活跃统计</span>
-            </el-menu-item>
+            </el-menu-item> -->
             <el-menu-item index="3">
               <el-icon><document /></el-icon>
               <span>用户画像</span>
