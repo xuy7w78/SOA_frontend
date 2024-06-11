@@ -222,6 +222,7 @@ export default {
       const url = proxy.$urls.names().upload_pdf;
       const ret = await new proxy.$request(url, {
         pdf_url: linker.value,
+        myusername: proxy.$props["username"],
       }).myPOST(); //请求
       if (ret.success) {
         return { success: true };
