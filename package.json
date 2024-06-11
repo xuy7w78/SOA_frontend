@@ -20,7 +20,8 @@
     "v-calendar": "^3.1.2",
     "vue": "^3.2.13",
     "vue-activity-calendar": "^1.2.2",
-    "vue-router": "^4.3.0"
+    "vue-router": "^4.3.0",
+    "vuex": "^4.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",

@@ -1,3 +1,5 @@
+
+
 <template>
   <div v-loading="tot_loading">
     <div style="text-align: left; font-size: 12px; padding: 10px">
@@ -102,14 +104,19 @@
   </el-drawer>
 </template>
 
+
 <script>
 import { reactive, toRefs, ref, getCurrentInstance, onMounted } from "vue";
 import { ElMessage } from "element-plus";
 
+
 export default {
   name: "SubPage_PDFs",
   emits: ["toExam"],
+  props: ["username"],
   setup() {
+    console.log("PDFs");
+
     const jumpTo = (val) => {
       console.log(val);
       window.open(val);
@@ -144,7 +151,8 @@ export default {
     //Requests
     const fetchpage = async (idx) => {
       const url = proxy.$urls.names().get_documents;
-      const ret = await new proxy.$request(url, { page_index: idx }).myGET(); //请求
+      console.log(proxy.$props["username"]);
+      const ret = await new proxy.$request(url, { page_index: idx, myusername: proxy.$props["username"] }).myGET(); //请求
       if (ret.success) {
         PDFs.PDFlist = ret.documents;
         PDFs.total_page = ret.total_pages;
@@ -179,7 +187,8 @@ export default {
     };
     const fetchrecommendations = async () => {
       const url = proxy.$urls.names().get_recommends;
-      const ret = await new proxy.$request(url).myGET(); //请求
+      console.log(proxy.$props["username"]);
+      const ret = await new proxy.$request(url, {myusername:proxy.$props["username"]}).myGET(); //请求
       if (ret.success) {
         RECs.recommendations = ret.recommendations;
         for (let i = 0; i < RECs.recommendations.length; i++) {

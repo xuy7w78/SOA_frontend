@@ -48,9 +48,9 @@
 
       <el-container style="height:600px">
         <el-main>
-          <SubPagePDFs v-if="select == '1'" @toExam="toExam"></SubPagePDFs>
+          <SubPagePDFs v-if="select == '1'" @toExam="toExam" :username="account"></SubPagePDFs>
           <Page404 v-if="select == '2'" />
-          <SubPageProfile v-if="select == '3'" />
+          <SubPageProfile v-if="select == '3'" :username="account"/>
           <SubPageExam
             v-if="select == '4'"
             @finishExam="finishExam"
@@ -95,7 +95,7 @@ export default {
     const logout = async() => {
       //logout
       const url = proxy.$urls.names().logout
-      const ret = await new proxy.$request(url).myGET()
+      const ret = await new proxy.$request(url, {myusername: account}).myGET()
       if(ret.success)
         proxy.$router.push({ name: "login_page" });
       else {

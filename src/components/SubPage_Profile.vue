@@ -33,6 +33,7 @@ export default {
   components: {
     // RadarChart
   },
+  props: ["username"],
   data() {
     return {
       user: {
@@ -52,7 +53,8 @@ export default {
   async created() {
     const {proxy} = getCurrentInstance()
     const url = proxy.$urls.names().get_profile
-    const ret = await new proxy.$request(url).myGET()
+
+    const ret = await new proxy.$request(url, {myusername : proxy.$props["username"]}).myGET()
     
 
     if(ret.success) {
